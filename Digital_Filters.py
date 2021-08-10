@@ -79,7 +79,7 @@ plt.savefig('Elliptic Filter Freq Response.png')
 # %%
 #Apllying a filter 
 def generate_random_signal():
-    t= linspace(0, 1, 1000, False) # 1 sec
+    t= np.linspace(0, 1, 1000, False) # 1 sec
     sig = np.sin(2*np.pi*10*t) + np.sin(2*np.pi*20*t) + np.random.rand(t.shape[0])
     return (t, sig)
 t, sig = generate_random_signal()
