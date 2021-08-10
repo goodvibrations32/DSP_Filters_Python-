@@ -77,6 +77,45 @@ plt.savefig('Elliptic Filter Freq Response.png')
 
 
 # %%
+#Apllying a filter 
+def generate_random_signal():
+    t= linspace(0, 1, 1000, False) # 1 sec
+    sig = np.sin(2*np.pi*10*t) + np.sin(2*np.pi*20*t) + np.random.rand(t.shape[0])
+    return (t, sig)
+t, sig = generate_random_signal()
 
+sos = signal.butter(10, 30, 'lp', fs = 1000, output = 'sos')
+filtered = signal.sosfilt(sos, sig)
+fig, (ax1, ax2) = plt.subplots(2, 1, sharex= True)
+fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] and noise')
+ax1.plot(t, sig)
+ax1.set_title('10 and 20 Hz sinusoids + noise')
+ax1.axis([0, 1, -2, 2])
+ax2.plot(t, filtered)
+ax2.set_title('After Filtering the noise')
+ax2.axis([0, 1, -2, 2])
+ax2.set_xlabel('Time [seconds]')
+plt.tight_layout()
+plt.show()
 
+# %%
+# Power Spectrum / signal.welch
+fs = 1000
+f, Pxx_spec = signal.welch(sig, fs, 'flattop', 1024, scaling = 'spectrum')
+plt.figure()
+plt.semilogy(f, np.sqrt(Pxx_spec))
+plt.xlabel('Frequency [Hz]')
+plt.ylabel('Linear spectrum [V RMS]')
+plt.title('Power spectrum (scipy.signal.welch)')
+plt.show()
 
+# %%
+#filtered signal Power Spectrum
+fs = 1000
+f, Pxx_spec = signal.welch(filtered, 'flattop', 1000, scaling= 'spectrum')
+plt.figure()
+plt.semilogy(f, np.sqrt(Pxx_spec))
+plt.xlabel ('Frequency [Hz]')
+plt.ylabel ('Linear Spectrum [V RMS]')
+plt.title ('Power Spectrum (scipy.signal.welch)')
+plt.show ()
