@@ -12,7 +12,7 @@ print ('Coefficients of b = ', bb)
 print ('Coefficients of a = ', ab)
 wb, hb = signal.freqz(bb, ab, worN = 512, whole = False, include_nyquist = True) # adding "include_nyquist = True" plots the last frequency that is otherwise ignored if "worN = int" && "whole = False" 
 wb = wb/(2*math.pi)
-plt.plot(wb, abs(np.array(hb)))    # plots like **plt.plot(y,x)**
+plt.plot(wb, abs(np.array(hb)))  
 
 plt.title('Butterworth filter frequency response')
 plt.xlabel('Frequency [cycles/sample]')
