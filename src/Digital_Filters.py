@@ -118,9 +118,9 @@ plt.title ('Power Spectrum (scipy.signal.welch)')
 plt.show ()
 
 #%%
-# simulation of the system response to the bessel filter used to eliminate noise
+# simulation of the system response to the butterworth filter used to eliminate noise
 from scipy.signal import lsim
-b, a = signal.bessel(N=10, Wn=2*np.pi*30, btype='lowpass', analog=True)
+b, a = signal.butter(N=10, Wn=2*np.pi*30, btype='lowpass', analog=True)
 tout, yout, xout = lsim((b, a), U=sig, T=t)
 plt.plot (t, sig, 'r', alpha=0.5, linewidth=1, label='input')
 plt.plot (tout, yout, 'k', linewidth=1.5, label='output')
