@@ -115,3 +115,5 @@ plt.ylabel ('Linear Spectrum [V RMS]')
 plt.title ('Power Spectrum (scipy.signal.welch)')
 plt.show ()
 
+#%%
+
