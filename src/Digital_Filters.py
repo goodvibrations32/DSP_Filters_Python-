@@ -1,7 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-from cmath import log10
+from cmath import log10, pi
 from matplotlib import projections
 import numpy as np 
 from numpy import logspace
@@ -76,20 +76,19 @@ plt.grid(which= 'both', axis= 'both')
 # %%
 #Apllying a filter on a sinusoidal signal with random noise and retrieving the pure sinusoidal tone of the sum of sin waves 10 Hz and 20 Hz 
 def generate_random_signal():
-    t= np.linspace(0, 1, 1000, False) # 1 sec
-    sig = np.sin(2*np.pi*10*t) + np.sin(2*np.pi*20*t) + np.random.rand(t.shape[0])
+    t= np.linspace(0, 1, 1024, False) # 1 sec
+    sig = np.sin(2*np.pi*10*t) + np.sin(2*np.pi*20*t) #+ np.sin(2*np.pi*1000*t)           #np.random.rand(t.shape[0]
     return (t, sig)
 t, sig = generate_random_signal()
-
-sos = signal.butter(N = 10, Wn = 30, btype = 'lp', fs = 1000, output = 'sos')
+sos = signal.butter(N = 10, Wn = 15, btype = 'lp', fs = 1024, output = 'sos')
 filtered = signal.sosfilt(sos, sig)
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex= True)
-fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] and noise')
+fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] ')
 ax1.plot(t, sig)
-ax1.set_title('10 and 20 Hz sinusoids + noise')
+ax1.set_title('10 and 20 Hz sinusoids ')
 ax1.axis([0, 1, -3, 3])
 ax2.plot(t, filtered)
-ax2.set_title('After Filtering the noise')
+ax2.set_title('After Filtering the 20 Hz')
 ax2.axis([0, 1, -3, 3])
 ax2.set_xlabel('Time [seconds]')
 plt.tight_layout()
@@ -97,8 +96,10 @@ plt.show()
 
 # %%
 # Power Spectrum / signal.welch
-fs = 1000
-f, Pxx_spec = signal.welch(sig, fs, window ='flattop', nperseg = 1000, scaling = 'spectrum')
+fs = 1024
+amp=2*np.sqrt(2)
+x=sig*amp
+f, Pxx_spec = signal.welch(x, fs, window ='flattop', nperseg = 1024, scaling = 'spectrum')
 plt.figure()
 plt.semilogy(f, np.sqrt(Pxx_spec))
 plt.xlabel('Frequency [Hz]')
@@ -108,8 +109,9 @@ plt.show()
 
 # %%
 #filtered signal Power Spectrum
-fs = 1000
-f, Pxx_spec = signal.welch(filtered, fs, window ='flattop', nperseg = 1000, scaling= 'spectrum')
+fs = 1024
+x2=filtered*amp
+f, Pxx_spec = signal.welch(x2, fs, window ='flattop', nperseg = 1024, scaling= 'spectrum')
 plt.figure()
 plt.semilogy(f, np.sqrt(Pxx_spec))
 plt.xlabel ('Frequency [Hz]')
@@ -118,9 +120,10 @@ plt.title ('Power Spectrum (scipy.signal.welch)')
 plt.show ()
 
 #%%
+"""
 # simulation of the system response to the butterworth filter used to eliminate noise
 from scipy.signal import lsim
-b, a = signal.butter(N=10, Wn=2*np.pi*30, btype='lowpass', analog=True)
+b, a = signal.butter(N=10, Wn=2*np.pi*15, btype='lowpass', analog=True)
 tout, yout, xout = lsim((b, a), U=sig, T=t)
 plt.plot (t, sig, 'r', alpha=0.5, linewidth=1, label='input')
 plt.plot (tout, yout, 'k', linewidth=1.5, label='output')
@@ -128,39 +131,43 @@ plt.legend (loc='best', shadow=True, framealpha=1)
 plt.grid (alpha=0.3)
 plt.xlabel ('time')
 plt.show ()
-
+"""
 # %%
 # Fast Fourier Transformation of input and output signals 
-from scipy.fft import fft, fftfreq
-N = 1000* 1  # (SAMPLE_RATE * DURATION)
-yf_input = fft(sig)
-xf_input = fftfreq (N , 1/1000)
-plt.plot (xf_input, np.abs(yf_input))
+from scipy.fft import fft, fftfreq, ifft
+N = fs* 1  # (SAMPLE_RATE * DURATION (s))
+yf_input = fft(x)
+xf_input = fftfreq (N , 1)
+plt.plot (np.abs(xf_input), np.abs(yf_input))
 plt.show()
-yf_output = fft(filtered)
-xf_output = fftfreq (N , 1/1000)
-plt.plot (xf_output, np.abs(yf_output))
+yf_output = fft(x2)
+xf_output = fftfreq (N , 1)
+plt.plot (np.abs(xf_output), np.abs(yf_output))
 plt.show()
 
 
 # %%
 #Bode plot for input and output
 
-H = yf_output/yf_input
+H= yf_output/ yf_input
 Y = np.imag (H)
 X = np.real (H)
 #Mag_of_H = 20*cmath.log10(Y)
-f = logspace(1,2) # frequencies from 10**1 to 10**5
+f = logspace(-1,0.001) # frequencies from 0 to 10**5
 sys = signal.lti([H],f)
-signal.bode(sys, w=None)
+w, mag, phase = signal.bode(sys, n= f)
+#print (w, mag, phase)
+plt.plot(f, w, label= 'Frequency rad/sec')
+plt.plot(f, mag, label= 'Magnitude [dB]' )
+plt.plot(f, phase, label='Phase array [deg]' )
+plt.grid(which='both', axis= 'both') 
+plt.legend()       
+#plt.xlabel('Real numbers R')
+#plt.ylabel('Imaginary numbers I')
+#plt.scatter(X,Y)
 
-plt.grid(which='both', axis= 'both')
-plt.xlabel('Real numbers R')
-plt.ylabel('Imaginary numbers I')
-plt.scatter(X,Y)
 
-
-plt.show()
+#plt.show()
 
 #fig= plt.figure()
 #ax = fig.add_subplot(projection = 'polar')
