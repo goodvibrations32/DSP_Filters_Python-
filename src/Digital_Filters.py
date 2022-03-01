@@ -1,8 +1,6 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-from cmath import log10, pi
-from matplotlib import projections
 import numpy as np 
 from numpy import logspace
 import math
@@ -78,7 +76,7 @@ plt.grid(which= 'both', axis= 'both')
 def generate_random_signal():
     t= np.linspace(0, 1, 1024, False) # 1 sec
     f0= 10
-    sig = 2* np.sin(2*np.pi*f0*t) + 3* np.sin(2*np.pi*2*f0*t) #+ np.sin(2*np.pi*1000*t)           #np.random.rand(t.shape[0]
+    sig = 2* np.sin(2*np.pi*f0*t) + 3* np.sin(2*np.pi*2*f0*t) # + np.sin(2*np.pi*1000*t)           #np.random.rand(t.shape[0]
     return (t, sig)
 t, sig = generate_random_signal()
 sos = signal.butter(N = 10, Wn = 15, btype = 'lp', fs = 1024, output = 'sos')
@@ -134,7 +132,6 @@ plt.show ()
 """
 # %%
 # Fast Fourier Transformation of input and output signals 
-from scipy.fft import rfft, rfftfreq
 f0=10
 N = int(10*(fs/f0))   
 
