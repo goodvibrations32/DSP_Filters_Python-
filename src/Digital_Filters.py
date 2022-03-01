@@ -136,7 +136,7 @@ plt.show ()
 # Fast Fourier Transformation of input and output signals 
 from scipy.fft import rfft, rfftfreq
 f0=10
-N = int(10*(fs/f0))   #fs* 1  # (SAMPLE_RATE * DURATION (s))
+N = int(10*(fs/f0))   
 
 yf_input = np.fft.rfft(sig) 
 y_input_mag_plot = np.abs(yf_input)/N
