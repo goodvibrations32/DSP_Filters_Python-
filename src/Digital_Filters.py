@@ -42,7 +42,7 @@ plt.grid(which= 'both', axis= 'both')
 # %%
 #4TH ORDER CHEBYSHEV FILTER TYPE 1 (ONLY IN PASSBAND RIPPLES) WITH MAX RIPPLES=2 AND THE GAIN DROP AT 1.5 CYCLES/SAMPLE
 
-bb_2, ab_2 = signal.cheby1 (N = 4, rp = 2, Wn = 0.3, btype = 'low', analog=False, output='ba')
+bb_2, ab_2 = signal.cheby1 (N = 20, rp = 2, Wn = 0.2, btype = 'low', analog=True, output='ba')
 print ('Coefficients of b = ', bb_2)
 print ('Coefficients of a = ', ab_2)
 wb_2, hb_2 = signal.freqz(bb_2, ab_2, worN = 512, whole = False, include_nyquist = True)
@@ -51,7 +51,7 @@ plt.plot(wb_2, abs(np.array(hb_2)))
 plt.title('Chebyshev filter frequency response')
 plt.xlabel('Frequency [cycles/sample]')
 plt.ylabel('Amplitute [dB]')
-plt.margins(0, 0.1)
+#plt.margins(0, 0.1)
 plt.grid(which= 'both', axis= 'both')
 
 # %%
@@ -72,64 +72,65 @@ plt.grid(which= 'both', axis= 'both')
 
 
 # %%
-#Apllying a filter on a sinusoidal signal with random noise and retrieving the pure sinusoidal tone of the sum of sin waves 10 Hz and 20 Hz 
+#Apllying a filter on a sinusoidal signal with  noise at 8000 Hz and retrieving the pure sinusoidal tone of the sum of sin waves 10 Hz and 20 Hz 
 def generate_random_signal():
-    t= np.linspace(0, 1, 1024, False) # 1 sec
+    t= np.linspace(0, 1, 44000, False) # 1 sec
     f0= 10
-    sig = 2* np.sin(2*np.pi*f0*t) + 3* np.sin(2*np.pi*2*f0*t) # + np.sin(2*np.pi*1000*t)           #np.random.rand(t.shape[0]
+    sig = 2* np.sin(2*np.pi*f0*t) + 3* np.sin(2*np.pi*2*f0*t) + 8* np.sin(2*np.pi*800*f0*t)           #np.random.rand(t.shape[0]
     return (t, sig)
 t, sig = generate_random_signal()
-sos = signal.butter(N = 10, Wn = 15, btype = 'lp', fs = 1024, output = 'sos')
-filtered = signal.sosfilt(sos, sig)
+sos_1 = signal.butter(N = 20, Wn = 3250, btype = 'lp', fs = 44000, output = 'sos')
+filtered = signal.sosfilt(sos_1, sig)
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex= True)
 fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] ')
 ax1.plot(t, sig)
-ax1.set_title('10 and 20 Hz sinusoids ')
-ax1.axis([0, 1, -5, 5])
+ax1.set_title('10 and 20 Hz sinusoids with 8kHz interferences')
+ax1.axis([0, 1, -10, 10])
 ax2.plot(t, filtered)
-ax2.set_title('After Filtering the 20 Hz')
-ax2.axis([0, 1, -5, 5])
+ax2.set_title('After Filtering the 8kHz')
+ax2.axis([0, 1, -10, 10])
 ax2.set_xlabel('Time [seconds]')
 plt.tight_layout()
 plt.show()
 
 # %%
 # Power Spectrum / signal.welch
-fs = 1024
+fs = 44000
 f, Pxx_spec = signal.welch(sig, fs, window ='flattop', nperseg = 1024, scaling = 'spectrum')
 plt.figure()
 plt.semilogy(f, np.sqrt(Pxx_spec))
-plt.xlim(0,50)
+plt.xlim(0, 10000)
+
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('Linear spectrum [V RMS]')
-plt.title('Power spectrum (scipy.signal.welch)')
+plt.title('Power spectrum before filter is applied')
 plt.show()
 
 # %%
 #filtered signal Power Spectrum
-fs = 1024
+fs = 44000
 f, Pxx_spec = signal.welch(filtered, fs, window ='flattop', nperseg = 1024, scaling= 'spectrum')
 plt.figure()
 plt.semilogy(f, np.sqrt(Pxx_spec))
-plt.xlim(0,50)
+plt.xlim(0,10000)
 plt.xlabel ('Frequency [Hz]')
 plt.ylabel ('Linear Spectrum [V RMS]')
-plt.title ('Power Spectrum (scipy.signal.welch)')
+plt.title (' Power spectrum of a Butterworth filter 20th order with cutoff frequency at 3250')
 plt.show ()
 
 #%%
-"""
+
 # simulation of the system response to the butterworth filter used to eliminate noise
 from scipy.signal import lsim
-b, a = signal.butter(N=10, Wn=2*np.pi*15, btype='lowpass', analog=True)
+b, a = signal.butter(N=20, Wn=2*np.pi*3250, btype='lowpass',fs=44800, analog=False)
 tout, yout, xout = lsim((b, a), U=sig, T=t)
 plt.plot (t, sig, 'r', alpha=0.5, linewidth=1, label='input')
-plt.plot (tout, yout, 'k', linewidth=1.5, label='output')
+plt.plot (tout, yout, 'k', linewidth=.1, label='output')
 plt.legend (loc='best', shadow=True, framealpha=1)
 plt.grid (alpha=0.3)
 plt.xlabel ('time')
 plt.show ()
-"""
+
 # %%
 # Fast Fourier Transformation of input and output signals 
 f0=10
@@ -149,23 +150,24 @@ fig, (ax1, ax2) = plt.subplots(2,1, sharex=True)
 fig.suptitle('Frequency domain of the original signal and filtered(below)')
 ax1.plot(f_plot, y_input_mag_plot)
 ax1.grid(alpha=0.3)
-#ax1.label('Frequency [Hz]')
+
 ax1.set_ylabel('Amplitute [dB]')
 
-#plt.plot (f_plot, x_mag_plot)
-#plt.show()
 yf_output = np.fft.rfft(filtered)
 y_output_mag_plot = np.abs(yf_output)/N
 y_output_mag_plot = 2* y_output_mag_plot[0:int(N/2+1)]
 y_output_mag_plot[0]= y_output_mag_plot[0]/2  
 ax2.plot(f_plot, y_output_mag_plot)
 
+plt.plot(f_plot, y_output_mag_plot)
 plt.grid(alpha=0.3)
 plt.xlabel('Frequency [Hz]')
 plt.ylabel('Amplitute [dB]')
-plt.xlim(0,50)
-plt.ylim(0,2)
+plt.xscale('log')
+
 plt.show()
+
+
 
 # %%
 #Bode plot for input and output
