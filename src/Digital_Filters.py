@@ -1,6 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
+from cProfile import label
 import numpy as np 
 from numpy import logspace
 import math
@@ -79,18 +80,36 @@ def generate_random_signal():
     sig = 2* np.sin(2*np.pi*f0*t) + 3* np.sin(2*np.pi*2*f0*t) + 8* np.sin(2*np.pi*800*f0*t)           #np.random.rand(t.shape[0]
     return (t, sig)
 t, sig = generate_random_signal()
-sos_1 = signal.butter(N = 20, Wn = 3250, btype = 'lp', fs = 44000, output = 'sos')
-filtered = signal.sosfilt(sos_1, sig)
-fig, (ax1, ax2) = plt.subplots(2, 1, sharex= True)
+sos = signal.butter(N = 10, Wn = 3250, btype = 'lp', fs = 44000, output = 'sos')
+filtered = signal.sosfilt(sos, sig)
+fig, (ax1, ax2) = plt.subplots( 2, 1, sharex=True)
 fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] ')
 ax1.plot(t, sig)
 ax1.set_title('10 and 20 Hz sinusoids with 8kHz interferences')
-ax1.axis([0, 1, -10, 10])
+ax1.axis([0, 1, -15, 15])
 ax2.plot(t, filtered)
 ax2.set_title('After Filtering the 8kHz')
-ax2.axis([0, 1, -10, 10])
+ax2.axis([0, 1, -5, 5])
 ax2.set_xlabel('Time [seconds]')
 plt.tight_layout()
+plt.show()
+
+sos_lp_2=signal.butter(N = 10, Wn = 15, btype = 'lowpass', fs = 44000, output = 'sos')
+sos_hp_2=signal.butter(N = 10, Wn = 15, btype = 'highpass', fs = 44000, output = 'sos')
+filtered_lp_2= signal.sosfilt(sos_lp_2, filtered)
+filtered_hp_2= signal.sosfilt(sos_hp_2,filtered)
+fig, (ax1, ax2) = plt.subplots( 2, 1, sharex=True)
+fig.suptitle('Filtering of signal with f1 = 10 [Hz], f2 = 20 [Hz] ')
+ax1.plot(t, filtered)
+ax1.set_title('filtered signal of 10 and 20 Hz sinusoids')
+ax1.axis([0, 1, -5, 5])
+ax2.plot(t, filtered_lp_2, label='10 Hz')
+ax2.plot(t,filtered_hp_2, label=('20 Hz'))
+
+ax2.axis([0, 1, -4, 4])
+ax2.set_xlabel('Time [seconds]')
+plt.tight_layout()
+plt.legend(bbox_to_anchor =(0.70, 1.15), ncol = 2 )
 plt.show()
 
 # %%
@@ -125,7 +144,7 @@ from scipy.signal import lsim
 b, a = signal.butter(N=20, Wn=2*np.pi*3250, btype='lowpass',fs=44800, analog=False)
 tout, yout, xout = lsim((b, a), U=sig, T=t)
 plt.plot (t, sig, 'r', alpha=0.5, linewidth=1, label='input')
-plt.plot (tout, yout, 'k', linewidth=.1, label='output')
+plt.plot (tout, yout, 'k', linewidth=0.05, label='output')
 plt.legend (loc='best', shadow=True, framealpha=1)
 plt.grid (alpha=0.3)
 plt.xlabel ('time')
