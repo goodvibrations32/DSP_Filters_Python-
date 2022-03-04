@@ -210,7 +210,7 @@ plt.semilogy(f, np.sqrt(Pxx_spec))
 plt.xlim(0,10000)
 plt.xlabel ('Frequency [Hz]')
 plt.ylabel ('Linear Spectrum [V RMS]')
-plt.title (' IIR Butterworth filtered signal Power Spectrum')
+plt.title (' IIR Butterworth LP filtered signal Power Spectrum')
 plt.show ()
 
 # %%
@@ -222,7 +222,7 @@ plt.semilogy(f, np.sqrt(Pxx_spec))
 plt.xlim(0,10000)
 plt.xlabel ('Frequency [Hz]')
 plt.ylabel ('Linear Spectrum [V RMS]')
-plt.title (' FIR filtered signal Power Spectrum')
+plt.title (' FIR LP filtered signal Power Spectrum')
 plt.show ()
 
 #%%
