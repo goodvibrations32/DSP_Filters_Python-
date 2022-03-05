@@ -112,7 +112,7 @@ plot_response(fs, w_2, h_2, "FIR Low-pass filter (signal.firwin (kaiser))")
 
 
 #Construct a FIR BP filter with kaiser window method
-f1, f2= 1/nyq_rate, 2/nyq_rate
+f1, f2= 1/nyq_rate, 15/nyq_rate
 
 taps_2_bandpass_kaiser = signal.firwin(numtaps, [f1, f2], pass_zero=False)
 w_2_bp_kaiser,h_2_bp_kaiser = signal.freqz(taps_2_bandpass_kaiser, [1], worN=2000) 
@@ -132,7 +132,8 @@ plot_response(fs, w_2_bp_kaiser, h_2_bp_kaiser, "FIR Band-pass filter (signal.fi
 
 
 #Seperate of 10 Hz and 20 Hz signals using FIR LP and HP for seperation
-cutoff_2 = 15
+cutoff_2 = 10
+cutoff_2_hp = 44
 trans_width_2 = 1
 numtaps_2 = 8000
 
@@ -141,15 +142,26 @@ taps_2_lp = signal.remez(numtaps_2, [0, cutoff_2, cutoff_2+trans_width_2, 0.5*fs
 w_2_lp, h_2_lp = signal.freqz(taps_2_lp, [1], worN=2000)
 
 #Construct a High-pass FIR filter 
-taps_2_hp = signal.remez(numtaps_2, [0, cutoff_2-trans_width_2, cutoff_2, 0.5*fs], [0,1], Hz= fs)
+taps_2_hp = signal.remez(numtaps_2, [0, cutoff_2_hp-trans_width_2, cutoff_2_hp, 0.5*fs], [0,1], Hz= fs)
 w_2_hp, h_2_hp = signal.freqz(taps_2_hp, [1], worN=2000)
 
 #Apply the FIR HP and LP filters
 y_2_lp = signal.lfilter(taps_2_lp, 1.0, y)
 y_2_hp = signal.lfilter(taps_2_hp, 1.0, y)
 
+#Plot the 2 signals seperate
+fig, (ax1, ax2)= plt.subplots(2, 1, sharex=True)
+ax1.plot(t, y_2_hp)
+ax1.set_title('20 Hz sine wave')
+ax1.axis([0, 1, -6, 6])
+ax2.plot (t, y_2_lp)
+ax2.set_title('10 Hz sine wave')
+ax2.axis([0, 1, -6, 6])
+plt.tight_layout()
+plt.show()
 
 
+"""
 #Construct a Bandpass filter to seperate 10 and 20 Hz
 #Band pass filter from 1 to 16 Hz
 band = [2,12]
@@ -178,12 +190,12 @@ ax2.axis([0, 1, -6, 6])
 plt.tight_layout()
 plt.show()
 
-
+"""
 
 #Plot the Frequency response of the filter
 
-#plot_response(fs, w_2_hp, h_2_hp, "FIR High-pass Filter")
-#plot_response(fs, w_2_lp, h_2_lp, "FIR Low-pass Filter")
+plot_response(fs, w_2_hp, h_2_hp, "FIR High-pass Filter")
+plot_response(fs, w_2_lp, h_2_lp, "FIR Low-pass Filter")
 #plot_response(fs, w_bp_10_Hz, h_bp_10_Hz, "FIR Band-pass Filter 10 Hz")
 #plot_response(fs, w_bp_20_Hz, h_bp_20_Hz, "FIR Band-pass Filter 20 Hz")
 
