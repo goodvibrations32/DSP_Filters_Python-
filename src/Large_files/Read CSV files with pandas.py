@@ -9,8 +9,44 @@ for dfChunk in pd.read_csv('generic-food.csv',chunksize=50):
 
 # %%
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 df = pd.read_csv('/home/goodvibrationskde/Documents/5m Sales Records.csv')
+
+#%%
+#Isolate data from the file for a specific country
+
+gr= df[df.Country == 'Greece']
+print(len(gr))
+
+#%%
+#Create file only with total profit, region and country keys
+Tot_prof = df.loc [:, ['Region', 'Country', 'Total Profit']]
+print(len(Tot_prof))
+
+#%%
+Tot_prof.to_csv('/home/goodvibrationskde/Documents/5m_only_TOT_PROF.csv')
+
+df_t_Profit = pd.read_csv('/home/goodvibrationskde/Documents/5m_only_TOT_PROF.csv')
+
+#%%
+
+df_t_Profit.info()
+
+
+#%%
+
+df_t_Profit.head()
+
+#%%
+# Sort by values (needs more work)
+totals = df_t_Profit.sum(axis = 1).sort_values()
+
+
+#%%
+canada= df[df.Country == 'Canada']
+print(len(canada))
 
 
 #%%
