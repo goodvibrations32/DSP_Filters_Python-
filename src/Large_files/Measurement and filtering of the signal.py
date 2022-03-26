@@ -185,26 +185,6 @@ blank_lp_fir_discon_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_inverter_discon_on
 
 
 #%%
-#This raises an error for incompatible shapes of the arrays 
-#but all H1, H2, H3, H4 have same shape (3800000,)
-
-# Transfer function of the FIR filter (z-Transform)
-# H(z) = Y(z) / X(z)
-time = np.linspace(0, 7.599998, 3800000)
-
-H1 = blank_lp_fir_con_off/ sig_inverter_con_off
-
-sys = signal.TransferFunction(w_fir_co, h_fir_co)
- 
-H2 = blank_lp_fir_con_on/ sig_inverter_con_on
-H3 = blank_lp_fir_con_on_WS_5/ sig_inverter_con_on_WS_5
-H4 = blank_lp_fir_discon_off/ sig_inverter_discon_off
-
-# sys= signal.lti(H1, H2, H3, H4)
-
-w, mag, phase = signal.bode(sys)
-plt.show()
-#%%
 #=====================================================
 #++++++++ Plot original and filtered signal+++++++++++ 
 #=====================================================
