@@ -147,7 +147,7 @@ print (first_column.head())
 #FIR Low-pass filter on the signal with the inverter connected and off
 
 #The length of the filter(number of coefficients, the filter order + 1)
-numtaps_2 = 100000
+numtaps_2 = 2000
 fs = 500000
 cutoff_hz = 0.00001
 nyq_rate = fs/2 
