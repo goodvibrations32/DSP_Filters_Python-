@@ -16,7 +16,7 @@ def plot_response(fs, w, h, title):
     plt.plot(0.5*fs*w/np.pi, 20*np.log10(np.abs(h)))
     plt.ylim(-40, 5)
     #plt.xscale('log')
-    plt.xlim(0, 400)
+    plt.xlim(0, 10000)
     plt.grid(True)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Gain (dB)')
@@ -64,6 +64,14 @@ def plot_sep_sig(x_1, y_1, x_2, y_2, TITLE, TITLE_2, color):
     plt.ylabel('Amplitute')
     plt.plot(x_2, y_2, color, linewidth= 1)
     plt.show()
+
+#%%
+#Define a function to reject corrutpted samples
+
+def good_stuff (x):
+    good_stuff_of_signal = x[warmup:]
+    return good_stuff_of_signal
+
 
 #%%
 #Define function for FFT
@@ -147,20 +155,68 @@ print (first_column.head())
 #FIR Low-pass filter on the signal with the inverter connected and off
 
 #The length of the filter(number of coefficients, the filter order + 1)
-numtaps_2 = 100000
+numtaps_2 = 512
 fs = 500000
 cutoff_hz = 0.00001
 nyq_rate = fs/2 
 
 
 #Use of firwin to create low-pass FIR filter
-fir_co = signal.firwin(numtaps_2, cutoff_hz)
-w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
+fir_co = signal.firwin(numtaps_2, cutoff_hz/nyq_rate)
+w_fir_co, h_fir_co = signal.freqz(fir_co, [1], whole=True)
 
 
 #%%
 #Plot the freq response of the filter
 plot_response(fs, w_fir_co, h_fir_co, 'Blank FIR filter')
+
+#%%
+# Characteristics of the filter designed above
+# 
+# source of code : https://www.gaussianwaves.com/2020/02/how-to-design-a-simple-fir-filter-to-reject-unwanted-frequencies/ 
+
+
+w = w_fir_co - 2*np.pi*(fir_co>=np.pi) #convert to range -pi to pi
+w = np.fft.fftshift(w_fir_co)
+h = np.fft.fftshift(h_fir_co)
+
+#Plot Magnitude-frequency response
+fig2, (ax) = plt.subplots(nrows=2,ncols=2)
+ax[0,0].plot(w,abs(h),'b')
+ax[0,0].set(title='Magnitude response',xlabel='Frequency [radians/sample]',ylabel='Magnitude [dB]')
+ax[0,0].grid();ax[0,0].axis('tight');
+
+#Plot phase response
+angles = np.unwrap(np.angle(h))
+ax[0,1].plot(w,angles,'r')
+ax[0,1].set(title='Phase response',xlabel='Frequency [radians/sample]',ylabel='Angles [radians]')
+ax[0,1].grid();ax[0,1].axis('tight');
+
+#Transfer function to pole-zero representation
+from scipy.signal import tf2zpk
+z, p, k = tf2zpk(fir_co, [1])
+
+#Plot pole-zeros on a z-plane
+from  matplotlib import patches
+patch = patches.Circle((0,0), radius=1, fill=False,
+                    color='black', ls='dashed')
+ax[1,0].add_patch(patch)
+ax[1,0].plot(np.real(z), np.imag(z), 'xb',label='Zeros')
+ax[1,0].plot(np.real(p), np.imag(p), 'or',label='Poles')
+ax[1,0].legend(loc=2)
+ax[1,0].set(title='Pole-Zero Plot',ylabel='Real',xlabel='Imaginary')
+ax[1,0].grid()
+
+#Impulse response
+#create an impulse signal
+imp = np.zeros(20)
+imp[0] = 1
+
+from scipy.signal import lfilter
+y_imp = lfilter(fir_co, [1], imp) #drive the impulse through the filter
+ax[1,1].stem(y_imp,linefmt='-.')
+ax[1,1].set(title='Impulse response',xlabel='Sample index [n]',ylabel='Amplitude')
+ax[1,1].axis('tight')
 
 
 #%%
@@ -190,27 +246,34 @@ blank_lp_fir_discon_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_inverter_discon_on
 
 # Transfer function of the FIR filter (z-Transform)
 # H(z) = Y(z) / X(z)
-time = np.linspace(0, 7.599998, 3800000)
+Time = np.linspace(0, 7.599998, 3800000)
 
-H1 = blank_lp_fir_con_off/ sig_inverter_con_off
 
-sys = signal.TransferFunction(w_fir_co, h_fir_co)
- 
+sys = signal.TransferFunction(w, h)
+
+ #H1 = blank_lp_fir_con_off/ sig_inverter_con_off
+
+""" 
 H2 = blank_lp_fir_con_on/ sig_inverter_con_on
 H3 = blank_lp_fir_con_on_WS_5/ sig_inverter_con_on_WS_5
 H4 = blank_lp_fir_discon_off/ sig_inverter_discon_off
+"""
 
 # sys= signal.lti(H1, H2, H3, H4)
 
 w, mag, phase = signal.bode(sys)
+plt.figure()
+plt.loglog(w, mag, label= 'Magnitute')    # Bode magnitude plot
+plt.show()
+plt.semilogx(w, phase, label= 'Phase')  # Bode phase plot
 plt.show()
 #%%
-#=====================================================
-#++++++++ Plot original and filtered signal+++++++++++ 
-#=====================================================
+# Here we create the original time interval of the measurment from 
+# the timestamps information by extracting the exact values 
+# from the dataset .head() and .tail()
 
 #Time interval of the samples
-time = np.linspace(0, 7.599998, 3800000)
+Time = np.linspace(0, 7.599998, 3800000)
 
 #The first N-1 samples are corrupted by the initial conditions
 warmup = numtaps_2 - 1
@@ -218,28 +281,38 @@ warmup = numtaps_2 - 1
 #The phase delay of the filtered signal
 delay= (warmup / 2) / fs
 
-time_no_shift = time[warmup:]-delay
-
-
-filt_con_off  = blank_lp_fir_con_off[warmup:]
-
-filt_con_on = blank_lp_fir_con_on[warmup:]
-
-filt_con_on_WS_5 = blank_lp_fir_con_on_WS_5[warmup:]
-
-filt_discon_off = blank_lp_fir_discon_off[warmup:]
-
-filt_discon_on = blank_lp_fir_discon_on[warmup:]
-
-filt_discon_on_WS_5 = blank_lp_fir_discon_on_WS_5[warmup:]
+time_no_shift = Time[warmup:]-delay
 
 
 #%%
+# Use of the constructed function to unshift the filtered signal for
+# proper representation in time and frequency domain
+
+filt_con_off  = good_stuff(blank_lp_fir_con_off)
+
+filt_con_on = good_stuff(blank_lp_fir_con_on)
+
+filt_con_on_WS_5 = good_stuff(blank_lp_fir_con_on_WS_5)
+
+filt_discon_off = good_stuff(blank_lp_fir_discon_off)
+
+filt_discon_on = good_stuff(blank_lp_fir_discon_on)
+
+filt_discon_on_WS_5 = good_stuff(blank_lp_fir_discon_on_WS_5)
+
+
+#%%
+
+#=====================================================
+#++++++++ Plot original and filtered signal+++++++++++ 
+#=====================================================
+
+
 #This plot is for the blank signal with shift and amplitute gain
 
 title('Filtered signal with phase shift with Inverter connected and off')
 
-plot(time-delay, blank_lp_fir_con_off, 'g-')
+plot(Time-delay, blank_lp_fir_con_off, 'g-')
 
 grid(True)
 
@@ -257,42 +330,42 @@ show()
 #===============================================
 #figure(1)
 
-plot_signals(time,time_no_shift,sig_inverter_con_off,filt_con_off,'Inverter connected and off')
+plot_signals(Time,time_no_shift,sig_inverter_con_off,filt_con_off,'Inverter connected and off')
 
 #===============================================
 #Inverter connected and on
 #===============================================
 #figure(2)
 
-plot_signals(time,time_no_shift,sig_inverter_con_on,filt_con_on,'Inverter connected and on')
+plot_signals(Time,time_no_shift,sig_inverter_con_on,filt_con_on,'Inverter connected and on')
 
 #===============================================
 #Inverter connected, on and WS=5[m/s]
 #===============================================
 #figure(3)
 
-plot_signals(time,time_no_shift,sig_inverter_con_on_WS_5,filt_con_on_WS_5,'Inverter connected, on and wind speed 5 [m/s]')
+plot_signals(Time,time_no_shift,sig_inverter_con_on_WS_5,filt_con_on_WS_5,'Inverter connected, on and wind speed 5 [m/s]')
 
 #===============================================
 #Inverter disconnected and off
 #===============================================
 #figure(4)
 
-plot_signals(time,time_no_shift,sig_inverter_discon_off,filt_discon_off,'Inverter disconnected and off')
+plot_signals(Time,time_no_shift,sig_inverter_discon_off,filt_discon_off,'Inverter disconnected and off')
 
 #===============================================
 #Inverter disconnected and on
 #===============================================
 #figure (5)
 
-plot_signals(time,time_no_shift,sig_inverter_discon_on,filt_discon_on,'Inverter disconnected and on')
+plot_signals(Time,time_no_shift,sig_inverter_discon_on,filt_discon_on,'Inverter disconnected and on')
 
 #===============================================
 #Inverter disconnected, on and WS=5[m/s]
 #===============================================
 #figure(6)
 
-plot_signals(time,time_no_shift,sig_inverter_discon_on_WS_5,filt_discon_on_WS_5,'Inverter disconnected, on and Wind speed 5 [m/s]')
+plot_signals(Time,time_no_shift,sig_inverter_discon_on_WS_5,filt_discon_on_WS_5,'Inverter disconnected, on and Wind speed 5 [m/s]')
 
 
 #%%
@@ -303,37 +376,37 @@ plot_signals(time,time_no_shift,sig_inverter_discon_on_WS_5,filt_discon_on_WS_5,
 #Inverter connected and off
 #===============================================
 
-plot_sep_sig(time, sig_inverter_con_off, time_no_shift, filt_con_off, 'Raw signal Inverter connected and off', 'Filtered signal Inverter connected and off', 'r')
+plot_sep_sig(Time, sig_inverter_con_off, time_no_shift, filt_con_off, 'Raw signal Inverter connected and off', 'Filtered signal Inverter connected and off', 'r')
 
 #===============================================
 #Inverter connected and on
 #===============================================
 
-plot_sep_sig(time, sig_inverter_con_on, time_no_shift, filt_con_on, 'Raw signal Inverter connected and on', 'Filtered signal Inverter connected and on', 'y')
+plot_sep_sig(Time, sig_inverter_con_on, time_no_shift, filt_con_on, 'Raw signal Inverter connected and on', 'Filtered signal Inverter connected and on', 'g')
 
 #===============================================
 #Inverter connected, on and WS=5[m/s]
 #===============================================
 
-plot_sep_sig(time, sig_inverter_con_on_WS_5, time_no_shift, filt_con_on_WS_5, 'Raw signal Inverter connected, on and wind speed 5 [m/s]', 'Filtered signal Inverter connected, on and wind speed 5 [m/s]', 'black')
+plot_sep_sig(Time, sig_inverter_con_on_WS_5, time_no_shift, filt_con_on_WS_5, 'Raw signal Inverter connected, on and wind speed 5 [m/s]', 'Filtered signal Inverter connected, on and wind speed 5 [m/s]', 'black')
 
 #===============================================
 #Inverter disconnected and off
 #===============================================
 
-plot_sep_sig(time, sig_inverter_discon_off, time_no_shift, filt_discon_off, 'Raw signal with Inverter disconnected and off', 'Filtered signal with Inverter disconnected and off', 'r-')
+plot_sep_sig(Time, sig_inverter_discon_off, time_no_shift, filt_discon_off, 'Raw signal with Inverter disconnected and off', 'Filtered signal with Inverter disconnected and off', 'r-')
 
 #===============================================
 #Inverter disconnected and on
 #===============================================
 
-plot_sep_sig(time, sig_inverter_discon_on, time_no_shift, filt_discon_on, 'Raw signal with Inverter disconnected and on', 'Filtered signal with Inverter disconnected and on', 'y')
+plot_sep_sig(Time, sig_inverter_discon_on, time_no_shift, filt_discon_on, 'Raw signal with Inverter disconnected and on', 'Filtered signal with Inverter disconnected and on', 'g')
 
 #===============================================
 #Inverter disconnected, on and WS=5[m/s]
 #===============================================
 
-plot_sep_sig(time, sig_inverter_discon_on_WS_5, time_no_shift, filt_discon_on_WS_5, 'Raw signal with Inverter disconnected, on and Wind speed 5 [m/s]', 'Filtered signal with Inverter disconnected, on and Wind speed 5 [m/s]', 'black')
+plot_sep_sig(Time, sig_inverter_discon_on_WS_5, time_no_shift, filt_discon_on_WS_5, 'Raw signal with Inverter disconnected, on and Wind speed 5 [m/s]', 'Filtered signal with Inverter disconnected, on and Wind speed 5 [m/s]', 'black')
 
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -572,7 +645,5 @@ plot_FFT(f_plot, y_input_mag_plot, y_output_mag_plot, 'Not shifted filter output
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-# %%
 
 # %%
