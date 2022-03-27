@@ -114,3 +114,8 @@ with h5py.File ('/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filt
 
 
 # %%
+with h5py.File('/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_filt_nt_.h5', 'r') as hdf:
+    ls = list(hdf.keys())
+    sp =list (hdf.head())
+    print ('List of datasets in this file: \n', ls)
+# %%
