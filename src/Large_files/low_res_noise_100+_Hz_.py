@@ -102,7 +102,7 @@ def plot_FFT (x1, y1, y2, title):
 
 #%%
 #Read and store the .h5 file with pandas
-f_1 = pd.HDFStore(path='/run/media/goodvibrations/KINGSTON/_noiseReference_2021/20210831/noise_reference_raw.h5', mode='r')
+f_1 = pd.HDFStore(path='/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
 
 data_raw = f_1['/df']
 
