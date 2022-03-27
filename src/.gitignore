@@ -1,2 +1,4 @@
 data_folder
 *.h5
+
+__pycache__
