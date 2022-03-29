@@ -126,7 +126,7 @@ final_data = [filt_con_off, filt_con_on, filt_con_on_WS_5, filt_discon_off,filt_
 new_file_name = input("""Enter the name of the new folder : 
 the file will be created in the same path with the raw data file
 if 0 is passed for a new name the old name is used with replacing
-the "raw" at the end of the name with "filt"
+the "raw" at the end of the name with "HD"
 """)
 
 if new_file_name == '0' :
@@ -155,6 +155,7 @@ hf_st_pd_.close()
 
 #%%
 #Read the file that was just created
+file_name =input('Enter the name of the filt signal file :') 
 
 f_3 = pd.HDFStore(path=f'{file_path}{file_name}',mode='r')
 
