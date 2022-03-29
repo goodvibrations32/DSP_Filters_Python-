@@ -163,3 +163,5 @@ data_filt = f_3['df_filt']
 #This is added in order to avoid manual close of the filtered data file
 f_3.close()
 
+
+# %%
