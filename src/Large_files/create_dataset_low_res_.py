@@ -3,40 +3,47 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
+import matplotlib.pyplot as plt
 
+#%%
+file_path = input('The full path of raw data file to process: ' )
+#%%
 #Read and store the .h5 file with pandas
-f_1 = pd.HDFStore(path='/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
+f_1 = pd.HDFStore(path=file_path, mode='r')
 
-data_raw = f_1['/df']
+print(f_1.keys())
 
+data_fr_key = input('Input the data frame key:' )
 
-#Store the measurment in one dimentional array and transform it in numpy ndarray for processing 
+data_raw = f_1[data_fr_key]
+print(data_raw.info())
 
-first_column =data_raw.get('raw-2021.08.31-12:26:54')
-sig_inverter_con_off = np.array(first_column)
+L = list(data_raw.keys())
 
-first_column.info()
+print (L)
 
-
-second_column = data_raw.get('raw-2021.08.31-12:28:24')
-sig_inverter_con_on = np.array(second_column)
-
-
-third_column = data_raw.get('raw-2021.08.31-12:32:08')
-sig_inverter_con_on_WS_5 = np.array(third_column)
-
-
-fourth_column = data_raw.get('raw-2021.08.31-12:34:29')
-sig_inverter_discon_off = np.array(fourth_column)
+#%%
+i=0
+raw_file = []
+for i in range (0,len(L)):
+    raw_file.append(data_raw.get(L[i]))
+    i+=1
 
 
-fifth_column = data_raw.get('raw-2021.08.31-12:35:42')
-sig_inverter_discon_on = np.array(fifth_column)
+i=0
+first_sig_raw_col_ = raw_file[0]
+#%%
+sig_in_numpy_format = []
+for i in range (0, len(L) ):
+    sig_in_numpy_format.append(np.array(raw_file[i]))
+    i+=1
+
+i=0
 
 
-sixth_column = data_raw.get('raw-2021.08.31-12:37:45')
-sig_inverter_discon_on_WS_5 = np.array(sixth_column)
 
+
+#%%
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,25 +67,26 @@ w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 
 #Apply the filter to the signal column by column from the data set
 
-blank_lp_fir_con_off = signal.lfilter(fir_co, 1.0, sig_inverter_con_off)
+blank_lp_fir_con_off = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[0])
 
-blank_lp_fir_con_on = signal.lfilter(fir_co, 1.0, sig_inverter_con_on)
 
-blank_lp_fir_con_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_inverter_con_on_WS_5)
+blank_lp_fir_con_on = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[1])
 
-blank_lp_fir_discon_off = signal.lfilter(fir_co, 1.0, sig_inverter_discon_off)
+blank_lp_fir_con_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[2])
 
-blank_lp_fir_discon_on = signal.lfilter(fir_co, 1.0, sig_inverter_discon_on)
+blank_lp_fir_discon_off = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[3])
 
-blank_lp_fir_discon_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_inverter_discon_on_WS_5)
+blank_lp_fir_discon_on = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[4])
+
+blank_lp_fir_discon_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[5])
 
 
 #=====================================================
 #++++++++ Plot original and filtered signal+++++++++++ 
 #=====================================================
-
+#%%
 #Time interval of the samples
-time = np.linspace(0, 7.599998, 3800000)
+time = np.linspace(0, 7.599998, len(data_raw))
 
 #The first N-1 samples are corrupted by the initial conditions
 warmup = numtaps_2 - 1
@@ -91,6 +99,7 @@ time_no_shift = time[warmup:]-delay
 
 filt_con_off  = blank_lp_fir_con_off[warmup:]
 
+#%%
 filt_con_on = blank_lp_fir_con_on[warmup:]
 
 filt_con_on_WS_5 = blank_lp_fir_con_on_WS_5[warmup:]
@@ -102,20 +111,47 @@ filt_discon_on = blank_lp_fir_discon_on[warmup:]
 filt_discon_on_WS_5 = blank_lp_fir_discon_on_WS_5[warmup:]
 
 #%%
-import h5py
+#Construct data frame better 
+#using pandas library
 
-with h5py.File ('/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_filt_nt_.h5', 'w') as hdf:
-    hdf.create_dataset('filtered Connected and off', data=filt_con_off)
-    hdf.create_dataset('filtered Connected and on', data=filt_con_on)
-    hdf.create_dataset('filtered Connected on and WS', data=filt_con_on_WS_5)
-    hdf.create_dataset('filtered Disconnected and off', data=filt_discon_off)
-    hdf.create_dataset('filtered Disconnected and on', data=filt_discon_on)
-    hdf.create_dataset('filtered Disconnected on and WS', data=filt_discon_on_WS_5)
+#Rename old attributes to mach with filtered data
+#signal
+
+F = []
+for i in range(0,len(L)):
+    F.append(L[i].replace("raw","filt"))
+i=0
+#%%
+#Create the new file
+#Choose the desired directory to create the new file 
+#and add the __NAME__.h5 at the end of the screen 
+# WARNING : If file already exists in the dir and it is closed via :
+#hf_st_pd_.close() it will be overwritten
+final_data = [filt_con_off, filt_con_on, filt_con_on_WS_5, filt_discon_off,filt_discon_on,filt_discon_on_WS_5]
+
+hf_st_pd_ = pd.HDFStore('/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/filt_data_with_noise_pandas_core_format_.h5', mode='w')
+
+df2 = pd.DataFrame({
+        
+    F[0]:final_data[0],
+    F[1]:final_data[1],
+    F[2]:final_data[2],
+    F[3]:final_data[3],
+    F[4]:final_data[4],
+    F[5]:final_data[5]
+    }
+,index=(time_no_shift)
+)
+
+hf_st_pd_.put('df_filt', df2, format='table', data_columns=True)
+    
+hf_st_pd_.close()
 
 
+#%%
+#The path needs ajustment from the user
+f_3 = pd.HDFStore(path='/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/filt_data_with_noise_pandas_core_format_.h5',mode='r')
+
+data_filt = f_3['df_filt']
 # %%
-with h5py.File('/home/goodvibrations/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_filt_nt_.h5', 'r') as hdf:
-    ls = list(hdf.keys())
-    sp =list (hdf.head())
-    print ('List of datasets in this file: \n', ls)
-# %%
+
