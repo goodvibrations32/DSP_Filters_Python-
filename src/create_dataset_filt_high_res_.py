@@ -155,7 +155,7 @@ hf_st_pd_.close()
 
 #%%
 #Read the file that was just created
-file_name =input('Enter the name of the filt signal file :') 
+
 
 f_3 = pd.HDFStore(path=f'{file_path}{file_name}',mode='r')
 
