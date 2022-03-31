@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 
 
 file_path = input('The full path of raw data file to process: ' )
@@ -163,3 +162,5 @@ data_filt = f_3['df_filt']
 #This is added in order to avoid manual close of the filtered data file
 f_3.close()
 
+
+# %%
