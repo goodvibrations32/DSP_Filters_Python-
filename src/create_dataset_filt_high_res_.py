@@ -37,7 +37,7 @@ for element2 in raw_sig_df:
 
 #The length of the filter(number of coefficients, the filter order + 1)
 numtaps_2 = 100_000
-fs = 500000
+fs = 500_000
 cutoff_hz = 0.00001
 nyq_rate = fs/2 
 
