@@ -131,8 +131,8 @@ for element0 in L:
 #FIR Low-pass filter on the signal with the inverter connected and off
 
 #The length of the filter(number of coefficients, the filter order + 1)
-numtaps_2 = 2000
-FS = 500000
+numtaps_2 = 100_000
+FS = 500_000
 cutoff_hz = 0.00001
 
 #Use of firwin to create low-pass FIR filter
