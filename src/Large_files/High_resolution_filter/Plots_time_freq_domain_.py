@@ -2,6 +2,7 @@
 # %%
 #Use of pandas library for reading hdf5 file format
 
+from socket import TIPC_CLUSTER_SCOPE
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -102,10 +103,17 @@ def plot_FFT (x1, y1, y2, title):
 
 #%%
 #Read and store the .h5 file with pandas
-f_1 = pd.HDFStore(path='/run/media/goodvibrations/KINGSTON/_noiseReference_2021/20210831/noise_reference_raw.h5', mode='r')
+f_1 = pd.HDFStore(path='/run/media/goodvibrations32/KINGSTON/_noiseReference_2021/20210831/noise_reference_raw.h5', mode='r')
 
 data_raw = f_1['/df']
 
+
+#%%
+L = list(data_raw.keys())
+matrix_raw = []
+#Manage data with lists 
+for element0 in L:
+    matrix_raw.append(np.array(data_raw.get(element0)))
 #%%
 #Store the measurment in one dimentional array and transform it in numpy ndarray for processing 
 
@@ -147,7 +155,7 @@ print (first_column.head())
 #FIR Low-pass filter on the signal with the inverter connected and off
 
 #The length of the filter(number of coefficients, the filter order + 1)
-numtaps_2 = 100000
+numtaps_2 = 2000
 fs = 500000
 cutoff_hz = 0.00001
 nyq_rate = fs/2 
@@ -162,6 +170,13 @@ w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 #Plot the freq response of the filter
 plot_response(fs, w_fir_co, h_fir_co, 'Blank FIR filter')
 
+#%%
+#Plotting in time domain
+matrix_filt = [] 
+x=[]
+for item in matrix_raw:
+    x=signal.lfilter(fir_co, 1.0, item)
+    matrix_filt.append(x)
 
 #%%
 #Apply the filter to the signal column by column from the data set
@@ -220,6 +235,21 @@ delay= (warmup / 2) / fs
 
 time_no_shift = time[warmup:]-delay
 
+#%%
+#Uncorrupted signal
+uncor = []
+for item in matrix_filt:
+    uncor.append(item[warmup:])
+
+#%%
+Titles = ['Inverter connected and off','Inverter connected and on','Inverter connected, on and wind speed 5 [m/s]','Inverter disconnected and off','Inverter disconnected and on','Inverter disconnected, on and Wind speed 5 [m/s]']
+# for simultaneously looping through lists
+for i,j,k in zip(matrix_raw, uncor, Titles):
+
+    plot_signals(time,time_no_shift,i,j,k)
+
+
+#%%
 
 filt_con_off  = blank_lp_fir_con_off[warmup:]
 
@@ -253,47 +283,15 @@ show()
 #better understanding the response of the system in time domain
 
 #===============================================
-#Inverter connected and off
+#Plot separate the signals 
 #===============================================
-#figure(1)
 
-plot_signals(time,time_no_shift,sig_inverter_con_off,filt_con_off,'Inverter connected and off')
+raw_titles = ['Raw signal Inverter connected and off','Raw signal Inverter connected and on','Raw signal Inverter connected, on and wind speed 5 [m/s]','Raw signal with Inverter disconnected and off','Raw signal with Inverter disconnected and on','Raw signal with Inverter disconnected, on and Wind speed 5 [m/s]']
+filt_titles = ['Filtered signal Inverter connected and off','Filtered signal Inverter connected and on','Filtered signal Inverter connected, on and wind speed 5 [m/s]','Filtered signal with Inverter disconnected and off','Filtered signal with Inverter disconnected and on','Filtered signal with Inverter disconnected, on and Wind speed 5 [m/s]']
+colors_filt = ['r','y','black','r','y','black']
 
-#===============================================
-#Inverter connected and on
-#===============================================
-#figure(2)
-
-plot_signals(time,time_no_shift,sig_inverter_con_on,filt_con_on,'Inverter connected and on')
-
-#===============================================
-#Inverter connected, on and WS=5[m/s]
-#===============================================
-#figure(3)
-
-plot_signals(time,time_no_shift,sig_inverter_con_on_WS_5,filt_con_on_WS_5,'Inverter connected, on and wind speed 5 [m/s]')
-
-#===============================================
-#Inverter disconnected and off
-#===============================================
-#figure(4)
-
-plot_signals(time,time_no_shift,sig_inverter_discon_off,filt_discon_off,'Inverter disconnected and off')
-
-#===============================================
-#Inverter disconnected and on
-#===============================================
-#figure (5)
-
-plot_signals(time,time_no_shift,sig_inverter_discon_on,filt_discon_on,'Inverter disconnected and on')
-
-#===============================================
-#Inverter disconnected, on and WS=5[m/s]
-#===============================================
-#figure(6)
-
-plot_signals(time,time_no_shift,sig_inverter_discon_on_WS_5,filt_discon_on_WS_5,'Inverter disconnected, on and Wind speed 5 [m/s]')
-
+for i,j,t,f,c in zip(matrix_raw, uncor,raw_titles,filt_titles,colors_filt):
+    plot_sep_sig(time, i, time_no_shift, j, t, f, c)
 
 #%%
 
