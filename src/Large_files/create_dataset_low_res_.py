@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 from scipy import signal
-import matplotlib.pyplot as plt
 
 #%%
 file_path = input('The full path of raw data file to process: ' )
@@ -17,15 +16,11 @@ print('The data frame key is: ',f_1.keys())
 data_fr_key = input('Input the data frame key of raw signal file:' )
 
 data_raw = f_1[data_fr_key]
-print(data_raw.info())
-
 L = list(data_raw.keys())
 
-print (L)
-
-
+print(data_raw.info())
 #%%
-#MAKE IT BETTER
+#Extract the raw data from the folder for processing
 raw_sig_df =[]
 
 for element1 in L:
@@ -101,6 +96,14 @@ F = []
 for i in range(0,len(L)):
     F.append(L[i].replace("raw","filt"))
 i=0
+
+#%%
+#Create a dictionary from the lists of modified keys and filtered output 
+a = dict(zip(F, filt_data))
+#Create a pandas dataframe for the generated file 
+df=pd.DataFrame(data=a, index=None)
+df.insert(loc=0, column="Time", value=time_no_shift)
+
 #%%
 #Create the new file
 #Choose the desired directory to create the new file 
@@ -121,25 +124,10 @@ if new_file_name == '0' :
 else:
     file_name = new_file_name
 
+#HDF5 file in same path with raw signal folder diff name
 hf_st_pd_ = pd.HDFStore(f'{file_path}{file_name}', mode='w')
-
-df2 = pd.DataFrame({
-        
-    F[0]:filt_data[0],
-    F[1]:filt_data[1],
-    F[2]:filt_data[2],
-    F[3]:filt_data[3],
-    F[4]:filt_data[4],
-    F[5]:filt_data[5]
-    }
-,index=(time_no_shift)
-)
-
-hf_st_pd_.put('df_filt', df2, format='table', data_columns=True)
-    
+hf_st_pd_.put('df_filt', df, format='table', data_columns=True)
 hf_st_pd_.close()
-
-
 #%%
 #Read the file that was just created
 
@@ -151,3 +139,5 @@ data_filt = f_3['df_filt']
 f_3.close()
 
 
+
+# %%
