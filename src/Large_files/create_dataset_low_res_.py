@@ -23,20 +23,17 @@ L = list(data_raw.keys())
 
 print (L)
 
-#%%
-i=0
-raw_file = []
-for i in range (0,len(L)):
-    raw_file.append(data_raw.get(L[i]))
-    i+=1
-i=0
-first_sig_raw_col_ = raw_file[0]
 
-sig_in_numpy_format = []
-for i in range (0, len(L) ):
-    sig_in_numpy_format.append(np.array(raw_file[i]))
-    i+=1
-i=0
+#%%
+#MAKE IT BETTER
+raw_sig_df =[]
+
+for element1 in L:
+    raw_sig_df.append(data_raw.get(L))
+
+sig_array= []
+for element2 in L:
+    sig_array.append(np.array(raw_sig_df))
 
 #%%
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,20 +54,15 @@ nyq_rate = fs/2
 fir_co = signal.firwin(numtaps_2, cutoff_hz)
 w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 
-#Apply the filter to the signal column by column from the data set
+#%%
+# LET'S MAKE IT BETTER
+blank_test =[]
+experiment = []
+for element3 in sig_array:
+    blank_test = signal.lfilter(fir_co, 1.0, element3)
+    experiment.append(blank_test)
 
-blank_lp_fir_con_off = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[0])
-
-
-blank_lp_fir_con_on = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[1])
-
-blank_lp_fir_con_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[2])
-
-blank_lp_fir_discon_off = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[3])
-
-blank_lp_fir_discon_on = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[4])
-
-blank_lp_fir_discon_on_WS_5 = signal.lfilter(fir_co, 1.0, sig_in_numpy_format[5])
+#%%
 
 #=====================================================
 #++++++++ Plot original and filtered signal+++++++++++ 
@@ -92,17 +84,11 @@ time_no_shift = time[warmup:]-delay
 # signal shift for rejecting the corrupted signal from the 
 #blank output of the filter
 
-filt_con_off  = blank_lp_fir_con_off[warmup:]
 
-filt_con_on = blank_lp_fir_con_on[warmup:]
+filt_data = []
+for element4 in experiment:
+    filt_data.append(element4[warmup:])
 
-filt_con_on_WS_5 = blank_lp_fir_con_on_WS_5[warmup:]
-
-filt_discon_off = blank_lp_fir_discon_off[warmup:]
-
-filt_discon_on = blank_lp_fir_discon_on[warmup:]
-
-filt_discon_on_WS_5 = blank_lp_fir_discon_on_WS_5[warmup:]
 
 #%%
 #Construct data frame better 
@@ -121,7 +107,7 @@ i=0
 #and add the __NAME__.h5 at the end of the screen 
 # WARNING : If file already exists in the dir and it is closed via :
 #hf_st_pd_.close() it will be overwritten
-final_data = [filt_con_off, filt_con_on, filt_con_on_WS_5, filt_discon_off,filt_discon_on,filt_discon_on_WS_5]
+#final_data = [filt_con_off, filt_con_on, filt_con_on_WS_5, filt_discon_off,filt_discon_on,filt_discon_on_WS_5]
 
 #%%
 new_file_name = input("""Enter the name of the new folder : 
@@ -139,12 +125,12 @@ hf_st_pd_ = pd.HDFStore(f'{file_path}{file_name}', mode='w')
 
 df2 = pd.DataFrame({
         
-    F[0]:final_data[0],
-    F[1]:final_data[1],
-    F[2]:final_data[2],
-    F[3]:final_data[3],
-    F[4]:final_data[4],
-    F[5]:final_data[5]
+    F[0]:filt_data[0],
+    F[1]:filt_data[1],
+    F[2]:filt_data[2],
+    F[3]:filt_data[3],
+    F[4]:filt_data[4],
+    F[5]:filt_data[5]
     }
 ,index=(time_no_shift)
 )
@@ -165,4 +151,3 @@ data_filt = f_3['df_filt']
 f_3.close()
 
 
-# %%
