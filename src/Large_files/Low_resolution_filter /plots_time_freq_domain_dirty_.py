@@ -155,7 +155,7 @@ for item in MATRIX_RAW:
 #%%
 
 #Time interval of the samples
-TIME = np.linspace(0, 7.599998, 3800000)
+TIME = np.linspace(0, 7.599998, 3_800_000)
 
 #The first N-1 samples are corrupted by the initial conditions
 warmup = numtaps_2 - 1
