@@ -50,8 +50,6 @@ for element3 in sig_array:
     blank_output = signal.lfilter(fir_co, 1.0, element3)
     EXP_DATA.append(blank_output)
 
-
-
 #Time interval of the samples
 TIME = np.linspace(0, 7.599998, len(data_raw))
 
@@ -63,16 +61,12 @@ delay= (warmup / 2) / fs
 
 TIME_NO_SHIFT = TIME[warmup:]-delay
 
-
-
 # signal shift for rejecting the corrupted signal from the 
 #blank output of the filter
 
 FILT_DATA = []
 for element4 in EXP_DATA:
     FILT_DATA.append(element4[warmup:])
-
-
 
 #Construct data frame better 
 #using pandas library
@@ -85,7 +79,6 @@ for i in range(0,len(L)):
     F.append(L[i].replace("raw","filt"))
 i=0
 
-
 #Create a dictionary from the lists of modified keys and filtered output 
 a = dict(zip(F, FILT_DATA))
 
@@ -93,14 +86,12 @@ a = dict(zip(F, FILT_DATA))
 df=pd.DataFrame(data=a, index=None)
 df.insert(loc=0, column="Time", value=TIME_NO_SHIFT)
 
-
 #Create the new file
 #Choose the desired directory to create the new file 
 #and add the __NAME__.h5 at the end of the screen 
 # WARNING : If file already exists in the dir and it is closed via :
 #hf_st_pd_.close() it will be overwritten
 #final_data = [filt_con_off, filt_con_on, filt_con_on_WS_5, filt_discon_off,filt_discon_on,filt_discon_on_WS_5]
-
 
 new_file_name = input("""Enter the name of the new folder : 
 the file will be created in the same path with the raw data file
@@ -121,8 +112,8 @@ hf_st_pd_.close()
 #Read the file that was just created
 
 f_3 = pd.HDFStore(path=f'{file_path}{file_name}',mode='r')
-
 data_filt = f_3['df_filt']
+
 # %%
 #This is added in order to avoid manual close of the filtered data file
 f_3.close()
