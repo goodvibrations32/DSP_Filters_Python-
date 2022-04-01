@@ -29,11 +29,11 @@ print (L)
 raw_sig_df =[]
 
 for element1 in L:
-    raw_sig_df.append(data_raw.get(L))
+    raw_sig_df.append(data_raw.get(element1))
 
 sig_array= []
-for element2 in L:
-    sig_array.append(np.array(raw_sig_df))
+for element2 in raw_sig_df:
+    sig_array.append(np.array(element2))
 
 #%%
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,11 +56,11 @@ w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 
 #%%
 # LET'S MAKE IT BETTER
-blank_test =[]
+blank_output =[]
 experiment = []
 for element3 in sig_array:
-    blank_test = signal.lfilter(fir_co, 1.0, element3)
-    experiment.append(blank_test)
+    blank_output = signal.lfilter(fir_co, 1.0, element3)
+    experiment.append(blank_output)
 
 #%%
 
