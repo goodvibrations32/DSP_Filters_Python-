@@ -9,6 +9,7 @@ The method used for the process is a simple long FIR filter. The size of the fil
 3. main branch : In this branch the files in the folder 'Filtering a signal' provide a general walkthrough in digital and analog both FIR (analog) and IIR (digital) type filters with some basic plots for understanding frequency responce. The files in the folder 'signal_process_plots' are providing plots in both time and frequency domain as well as the power spectrum of the raw and processed signals.
 
 All the data used in this project was provided by an organization. Minor adjustments may be needed for file paths in OS.
+
 Dependencies : python >=3.6 (f-strings), numpy, scipy, matplotlib
 
 --
