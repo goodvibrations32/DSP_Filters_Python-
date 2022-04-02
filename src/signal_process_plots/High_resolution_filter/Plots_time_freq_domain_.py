@@ -1,14 +1,12 @@
 
 # %%
 #Use of pandas library for reading hdf5 file format
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import signal
 
 # Define function for Filter freq response
-
 def plot_response(fs, w, h, title):
     plt.figure()
     plt.plot(0.5*fs*w/np.pi, 20*np.log10(np.abs(h)))
@@ -21,14 +19,11 @@ def plot_response(fs, w, h, title):
     plt.title(title)
 
 #Define a function for Welch's method power spectrum for a signal
-
 def spect (x):
     x,y = signal.welch(x,FS,window='flattop', nperseg=1024, scaling='spectrum')
     return x, y
 
-
 #Define a function for plotting the Power spectrums
-
 def plot_spectrum(x, y, title):
     plt.figure()
     plt.semilogy(x, np.sqrt(y))
@@ -38,7 +33,6 @@ def plot_spectrum(x, y, title):
     plt.title(title)
 
 #Define function to plot the raw and filtered signals combined 
-
 def plot_signals(x1,x2,y1,y2,Title):
     plt.title(Title)
     plt.plot(x1, y1, label= 'Raw signal')
@@ -99,14 +93,35 @@ def plot_FFT (x1, y1, y2, title):
     plt.legend()
     plt.show()
 
+"""
+Manual approach
 #Read and store the .h5 file with pandas
-f_1 = pd.HDFStore(path='/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
+file_path = "/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/"
+file_name_of_raw = 'noise_reference_raw.h5'
+f_1 = pd.HDFStore(path=f'{file_path}{file_name_of_raw}', mode='r')
 
 data_raw = f_1['/df']
 
 
 #Make a list for the keys present in the data frame
 L = list(data_raw.keys())
+"""
+#Interactive with user
+
+file_path = input('The full path of raw data file to process: ' )
+file_name_of_raw =input('Enter the name of the raw signal file :') 
+
+#Read and store the .h5 file with pandas
+f_1 = pd.HDFStore(path=f'{file_path}{file_name_of_raw}', mode='r')
+
+print('The data frame key is: ',f_1.keys())
+
+data_fr_key = input('Input the data frame key of raw signal file:' )
+
+data_raw = f_1[data_fr_key]
+L = list(data_raw.keys())
+
+print(data_raw.info())
 
 #Manage data with lists 
 MATRIX_RAW = []
