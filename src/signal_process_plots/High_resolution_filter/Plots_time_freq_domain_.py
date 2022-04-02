@@ -129,7 +129,7 @@ fir_co = signal.firwin(numtaps_2, cutoff_hz)
 w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 
 #Plot the freq response of the filter
-plot_response(FS, w_fir_co, h_fir_co, 'Blank FIR filter')
+#plot_response(FS, w_fir_co, h_fir_co, 'Blank FIR filter')
 
 #Filtering the raw signal with the above FIR filter 
 MATRIX_FILT = [] 
