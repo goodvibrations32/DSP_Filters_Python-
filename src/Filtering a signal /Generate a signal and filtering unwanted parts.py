@@ -160,38 +160,6 @@ ax2.axis([0, 1, -6, 6])
 plt.tight_layout()
 plt.show()
 
-
-"""
-#Construct a Bandpass filter to seperate 10 and 20 Hz
-#Band pass filter from 1 to 16 Hz
-band = [2,12]
-numtaps_bandpass = 1000
-edges = [0, band[0] - trans_width_2, band[0], band[1], band[1] + trans_width_2, 0.5*fs]
-taps_bandpass_10_Hz = signal.remez(numtaps_bandpass, edges, [0, 1, 0], Hz=fs)
-w_bp_10_Hz, h_bp_10_Hz = signal.freqz(taps_bandpass_10_Hz, [1], worN=2000)
-
-band_pass_for_10_Hz = signal.lfilter(taps_bandpass_10_Hz, 1.0, y)
-
-#Band pass filter from 16 to 100 Hz
-band_2 = [15, 50]
-edges_2 = [0, band_2[0] - trans_width_2, band_2[0], band_2[1], band_2[1] + trans_width_2, 0.5*fs]
-taps_bandpass_20_Hz = signal.remez(numtaps_bandpass, edges_2, [0, 1, 0], Hz=fs)
-w_bp_20_Hz, h_bp_20_Hz = signal.freqz(taps_bandpass_20_Hz, [1], worN=2000)
-band_pass_for_20_Hz = signal.lfilter(taps_bandpass_20_Hz, 1.0, y)
-
-#Plot the 2 signals seperate
-fig, (ax1, ax2)= plt.subplots(2, 1, sharex=True)
-ax1.plot(t, band_pass_for_20_Hz)
-ax1.set_title('20 Hz sine wave')
-ax1.axis([0, 1, -6, 6])
-ax2.plot (t, band_pass_for_10_Hz)
-ax2.set_title('10 Hz sine wave')
-ax2.axis([0, 1, -6, 6])
-plt.tight_layout()
-plt.show()
-
-"""
-
 #Plot the Frequency response of the filter
 
 plot_response(fs, w_2_hp, h_2_hp, "FIR High-pass Filter")
@@ -332,33 +300,3 @@ plt.xscale('log')
 plt.legend()
 
 plt.show()
-
-
-
-# %%
-#Bode plot for input and output
-# needs more work for proper implementation
-H= yf_output/ yf_input
-Y = np.imag (H)
-X = np.real (H)
-#Mag_of_H = 20*cmath.log10(Y)
-f = logspace(-1,0.001) # frequencies from 0 to 10**5
-sys = signal.lti([H],f)
-w, mag, phase = signal.bode(sys, n= f)
-#print (w, mag, phase)
-plt.plot(f, w, label= 'Frequency rad/sec')
-plt.plot(f, mag, label= 'Magnitude [dB]' )
-plt.plot(f, phase, label='Phase array [deg]' )
-plt.grid(which='both', axis= 'both') 
-plt.legend()       
-#plt.xlabel('Real numbers R')
-#plt.ylabel('Imaginary numbers I')
-#plt.scatter(X,Y)
-
-
-#plt.show()
-
-#fig= plt.figure()
-#ax = fig.add_subplot(projection = 'polar')
-#c= ax.scatter(X,Y)
-#plt.title('Polar representation of ')
