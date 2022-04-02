@@ -25,7 +25,7 @@ def plot_response(fs, w, h, title):
 #Define a function for Welch's method power spectrum for a signal
 
 def spect (x):
-    x,y = signal.welch(x,FS,window='flattop', nperseg=1024, scaling='spectrum')
+    x,y = signal.welch(x,FS,window='flattop', nperseg=1_024, scaling='spectrum')
     return x, y
 
 #%%
@@ -43,10 +43,10 @@ def plot_spectrum(x, y, title):
 #%%
 #Define function to plot the raw and filtered signals combined 
 
-def plot_signals(x1,x2,y1,y2,Title):
+def plot_signals(x_1,x_2,y_1,y_2,Title):
     plt.title(Title)
-    plt.plot(x1, y1, label= 'Raw signal')
-    plt.plot(x2, y2, label='Filtered signal')
+    plt.plot(x_1, y_1, label= 'Raw signal')
+    plt.plot(x_2, y_2, label='Filtered signal')
     plt.grid(True)
     plt.xlabel('Time [s]')
     plt.ylabel('Amplitute')
@@ -75,9 +75,9 @@ def plot_sep_sig(x_1, y_1, x_2, y_2, TITLE, TITLE_2, color):
 #Define function for FFT of two signals to be able of plotting 
 #the corrupted and uncorrupted signals in frequency domain
 def fft_sig (y1, y2):
-    f0 = 2000
-    fs = 500000
-    N = int(2000*(fs/f0))
+    f0 = 2_000
+    fs = 500_000
+    N = int(2_000*(fs/f0))
     yf_input = np.fft.fft(y1)
     y_input_mag_plot = np.abs(yf_input)/N
     f= np.linspace (0, (N-1)*(fs/N),N )
@@ -111,8 +111,8 @@ def plot_FFT (x1, y1, y2, title):
 #Read and store the .h5 file with pandas
 f_1 = pd.HDFStore(path='/run/media/goodvibrations32/KINGSTON/_noiseReference_2021/20210831/noise_reference_raw.h5', mode='r')
 
+#Store all the dataframe in a variable
 data_raw = f_1['/df']
-
 
 #%%
 #Make a list for the keys present in the data frame
@@ -198,7 +198,7 @@ for i,j,t,f,c in zip(MATRIX_RAW, UNCORR, raw_titles, filt_titles, colors_filt):
 raw_titles_spec = ['Raw signal Power spectrum (Inverter connected and off)','Raw signal Power spectrum (Inverter connected and on)','Raw signal Power spectrum (Inverter connected, on and WS=5m/s)','Raw signal Power spectrum (Inverter disconnected and off)','Raw signal Power spectrum (Inverter disconnected and on)','Raw signal Power Spectrum (Inverter disconnected, on and WS=5m/s)']
 filt_titles_spec = ['Filtered signal Power spectrum (Inverter connected and off)','Filtered signal Power spectrum (Inverter connected and on)','Filtered signal Power Spectrum (Inverter connected, on and WS=5m/s)','Filtered signal Power Spectrum (Inverter disconnected and off)','Filtered signal Power Spectrum (Inverter disconnected and on)','Filtered signal Power Spectrum (Inverter disconnected, on and WS=5m/s)']
 
-#Plot the raw and filtered signals spectrums with titles 
+#Plot the raw and filtered signals power spectrums with titles 
 for i,j,t3,t4 in zip(MATRIX_RAW, UNCORR, raw_titles_spec, filt_titles_spec):
     f_r, Prr_spec = spect(i)
     plot_spectrum(f_r, Prr_spec,t3)
@@ -211,7 +211,7 @@ for i,j,t3,t4 in zip(MATRIX_RAW, UNCORR, raw_titles_spec, filt_titles_spec):
 blank_freq_dom_titles = ['Blank filter output with Inverter connected, off','Blank filter output with Inverter connected, on','Blank filter output with Inverter connected, on and WS=5[m/s]','Blank filter output with Inverter disconnected, off','Blank filter output with Inverter disconnected, on','Blank filter output with Inverter disconnected, on and WS=5[m/s]']
 shifted_freq_dom_titles = ['Not shifted filter output with Inverter connected, off','Not shifted filter output with Inverter connected, on', 'Not shifted filter output with Inverter connected, on and WS=5[m/s]','Not shifted filter output with Inverter disconnected, off','Not shifted filter output with Inverter disconnected, on','Not shifted filter output with Inverter disconnected, on and WS=5[m/s]']
 
-#Compute the FFT of raw, corrupted and uncorrupted signals and plot them combined for comparison 
+#Compute the FFT of raw, corrupted and uncorrupted signals and plot them combined in pairs for comparison 
 for i,j,k,t1,t2 in zip(MATRIX_RAW,MATRIX_FILT,UNCORR,blank_freq_dom_titles,shifted_freq_dom_titles):
     f,yin,yout= fft_sig(i,j)
     plot_FFT(f,yin,yout,t1)
