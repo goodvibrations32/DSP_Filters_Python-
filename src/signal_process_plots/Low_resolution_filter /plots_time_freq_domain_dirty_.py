@@ -98,16 +98,30 @@ def plot_FFT (x1, y1, y2, title):
     plt.legend()
     plt.show()
 
-
+"""
 #Read and store the .h5 file with pandas
 f_1 = pd.HDFStore(path='/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
 
 #Store all the dataframe in a variable
 data_raw = f_1['/df']
+"""
 
+file_path = input('The full path of raw data file to process: ' )
+file_name_of_raw =input('Enter the name of the raw signal file :') 
 
-#Make a list for the keys present in the data frame
+#Read and store the .h5 file with pandas
+f_1 = pd.HDFStore(path=f'{file_path}{file_name_of_raw}', mode='r')
+
+print('The data frame key is: ',f_1.keys())
+
+data_fr_key = input('Input the data frame key of raw signal file:' )
+
+data_raw = f_1[data_fr_key]
+
+#Make a list with present keys
 L = list(data_raw.keys())
+
+print(data_raw.info())
 
 #Manage data with lists 
 MATRIX_RAW = []
@@ -117,7 +131,6 @@ for element0 in L:
 
 
 #The only filter with les standard deviation on output from input
-#Somehow should test more of these kind of filters with no window functions 
 
 #FIR Low-pass filter on the signal with the inverter connected and off
 
@@ -130,11 +143,10 @@ cutoff_hz = 0.00001
 fir_co = signal.firwin(numtaps_2, cutoff_hz)
 w_fir_co, h_fir_co = signal.freqz(fir_co, [1])
 
-
+"""
 #Plot the freq response of the filter
 plot_response(FS, w_fir_co, h_fir_co, 'Blank FIR filter')
-
-
+"""
 #Filtering the raw signal with the above FIR filter 
 MATRIX_FILT = [] 
 x=[]
