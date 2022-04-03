@@ -93,19 +93,19 @@ def plot_FFT (x1, y1, y2, title):
     plt.legend()
     plt.show()
 
-"""
-Manual approach
-#Read and store the .h5 file with pandas
-file_path = "/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/"
-file_name_of_raw = 'noise_reference_raw.h5'
-f_1 = pd.HDFStore(path=f'{file_path}{file_name_of_raw}', mode='r')
+# 
+# Manual approach
+# #Read and store the .h5 file with pandas
+# file_path = "/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/"
+# file_name_of_raw = 'noise_reference_raw.h5'
+# f_1 = pd.HDFStore(path=f'{file_path}{file_name_of_raw}', mode='r')
+# 
+# data_raw = f_1['/df']
+# 
+# 
+# #Make a list for the keys present in the data frame
+# L = list(data_raw.keys())
 
-data_raw = f_1['/df']
-
-
-#Make a list for the keys present in the data frame
-L = list(data_raw.keys())
-"""
 #Interactive with user
 
 file_path = input('The full path of raw data file to process: ' )

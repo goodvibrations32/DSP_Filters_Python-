@@ -98,13 +98,16 @@ def plot_FFT (x1, y1, y2, title):
     plt.legend()
     plt.show()
 
-"""
-#Read and store the .h5 file with pandas
-f_1 = pd.HDFStore(path='/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
-
-#Store all the dataframe in a variable
-data_raw = f_1['/df']
-"""
+# 
+# The path sould match users on local machine
+# for this approach to work
+# 
+# #Read and store the .h5 file with pandas
+# f_1 = pd.HDFStore(path='/home/goodvibrations32/Documents/Git_clones_dissertation/DSP_Filters_Python-/src/data_folder/noise_reference_raw.h5', mode='r')
+# 
+# #Store all the dataframe in a variable
+# data_raw = f_1['/df']
+# 
 
 file_path = input('The full path of raw data file to process: ' )
 file_name_of_raw =input('Enter the name of the raw signal file :') 
