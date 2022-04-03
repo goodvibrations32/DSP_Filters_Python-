@@ -11,7 +11,7 @@ from Plots_time_freq_domain_ import UNCORR, TIME_NO_SHIFT, L, file_name_of_raw, 
 #Rename old attributes to match with filtered data signal
 F=[]
 for item in L:
-    F.append(item.replace("raw","filt")) 
+    F.append(item.replace("raw","HD")) 
 
 #Create a dictionary from the lists of modified keys and filtered output 
 a = dict(zip(F, UNCORR))

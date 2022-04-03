@@ -62,9 +62,9 @@ def plot_sep_sig(x_1, y_1, x_2, y_2, TITLE, TITLE_2, color):
 #Define function for FFT of two signals to be able of plotting 
 #the corrupted and uncorrupted signals in frequency domain
 def fft_sig (y1, y2):
-    f0 = 2000
-    fs = 500000
-    N = int(2000*(fs/f0))
+    f0 = 2_000
+    fs = 500_000
+    N = int(2_000*(fs/f0))
     yf_input = np.fft.fft(y1)
     y_input_mag_plot = np.abs(yf_input)/N
     f= np.linspace (0, (N-1)*(fs/N),N )
@@ -155,7 +155,7 @@ for item in MATRIX_RAW:
 
 
 #Time interval of the samples
-TIME = np.linspace(0, 7.599998, 3_800_000)
+TIME = np.linspace(0, 7.599998, len(MATRIX_RAW[0]))
 
 #The first N-1 samples are corrupted by the initial conditions
 warmup = numtaps_2 - 1
